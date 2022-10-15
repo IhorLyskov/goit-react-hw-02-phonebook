@@ -1,21 +1,43 @@
 import React, { Component } from 'react';
 import { initialState, storageKey } from './constants/Constants';
-import { load, save, remove } from './utils/localstorage';
-
-// import Section from './Section/Section';
-// import ButtonsDiv from './ButtonsDiv/ButtonsDiv';
-// import Statistics from './Statistics/Statistics';
-// import Notification from './Notification/Notification';
+import { load, save } from './utils/localstorage';
+import ContactForm from './ContactForm/ContactForm';
 
 import { GlobalStyle } from './GlobalStyle/GlobalStyle.styled';
 
 export class App extends Component {
   state = { contacts: [], filter: '' };
 
+  componentDidMount() {
+    const contacts = load(storageKey);
+    this.setState(
+      contacts ? { contacts: contacts } : { contacts: initialState.contacts }
+    );
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const newContacts = this.state.contacts;
+    if (newContacts !== prevState.contacts) {
+      save(storageKey, newContacts);
+    }
+  }
+  onSubmit = ({ id, name, number }) => {
+    const contact = {
+      id,
+      name,
+      number,
+    };
+    console.log(contact);
+  };
+
   render() {
     return (
       <>
         <GlobalStyle />
+        <div style={{ marginLeft: '30px' }}>
+          <h1>Phonebook</h1>
+          <ContactForm onSubmit={this.onSubmit} />
+        </div>
         {/* <Section title="Please live feedback">
           <ButtonsDiv
             actions={Object.keys(this.state)}
@@ -29,32 +51,9 @@ export class App extends Component {
 }
 
 // import Filter from './Filter/Filter';
-// import ContactForm from './ContactForm';
 // import ContactList from './ContactsList';
 // import debounce from 'lodash.debounce';
 // import * as storage from '../utils/storage';
-
-// export class App extends Component {
-//   state = { contacts: [], filter: '' };
-//   STORAGE_KEY = 'contacts';
-
-//   componentDidMount() {
-//     const contacts = storage.load(this.STORAGE_KEY);
-//     if (contacts) {
-//       this.setState({ contacts: contacts });
-//     } else {
-//       this.setState({ contacts: INITIAL_STATE.contacts });
-//     }
-//   }
-
-//   componentDidUpdate(prevProps, prevState) {
-//     const nextContacts = this.state.contacts;
-//     const prevContacts = prevState.contacts;
-
-//     if (nextContacts !== prevContacts) {
-//       storage.save(this.STORAGE_KEY, nextContacts);
-//     }
-//   }
 
 //   onSubmit = ({ id, name, number }) => {
 //     const contact = {
