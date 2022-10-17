@@ -1,7 +1,14 @@
 import React, { Component } from 'react';
+
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
+import debounce from 'lodash.debounce';
+
 import { initialState, storageKey } from './constants/Constants';
 import { load, save } from './utils/localstorage';
+import * as Section from './Section/Section';
 import ContactForm from './ContactForm/ContactForm';
+import ContactsList from './ContactsList/ContactsList';
+import Filter from './Filter/Filter';
 
 import { GlobalStyle } from './GlobalStyle/GlobalStyle.styled';
 
@@ -21,86 +28,61 @@ export class App extends Component {
       save(storageKey, newContacts);
     }
   }
-  onSubmit = ({ id, name, number }) => {
+
+  handleSubmit = ({ id, name, number }) => {
     const contact = {
       id,
       name,
       number,
     };
-    console.log(contact);
+    if (this.state.contacts.find(contact => contact.name === name)) {
+      Notify.info(`${name} is already in contacts`);
+      return false;
+    }
+    this.setState(({ contacts }) => ({ contacts: [...contacts, contact] }));
+    return true;
+  };
+
+  handleContactDelete = ({ id }) => {
+    this.setState(prevState => ({
+      contacts: prevState.contacts.filter(contact => contact.id !== id),
+    }));
+  };
+
+  handleFilterChange = ({ value }) => {
+    this.setState({ filter: value });
+  };
+
+  handleFilterChangeDebounced = debounce(this.handleFilterChange, 500);
+
+  handleDeleteContact = ({ id }) => {
+    this.setState(prevState => ({
+      contacts: prevState.contacts.filter(contact => contact.id !== id),
+    }));
   };
 
   render() {
+    const { contacts, filter } = this.state;
+    let filteredContacts = contacts;
+    if (filter) {
+      filteredContacts = contacts.filter(({ name }) => {
+        return name.toLowerCase().includes(filter.toLowerCase());
+      });
+    }
     return (
       <>
         <GlobalStyle />
-        <div style={{ marginLeft: '30px' }}>
-          <h1>Phonebook</h1>
-          <ContactForm onSubmit={this.onSubmit} />
-        </div>
-        {/* <Section title="Please live feedback">
-          <ButtonsDiv
-            actions={Object.keys(this.state)}
-            onClick={this.incrementActionState}
+        <Section.H1 title="Phonebook">
+          <ContactForm onSubmit={this.handleSubmit} />
+        </Section.H1>
+        <Section.H2 title="Contacts">
+          <Filter onInput={this.handleFilterChangeDebounced} />
+          <ContactsList
+            contacts={filteredContacts}
+            onDelete={this.handleContactDelete}
           />
-        </Section>
-        <Section title="Statistics">{statistics}</Section> */}
+        </Section.H2>
       </>
     );
   }
 }
-
-// import Filter from './Filter/Filter';
-// import ContactList from './ContactsList';
-// import debounce from 'lodash.debounce';
-// import * as storage from '../utils/storage';
-
-//   onSubmit = ({ id, name, number }) => {
-//     const contact = {
-//       id,
-//       name,
-//       number,
-//     };
-//     if (this.state.contacts.find(contact => contact.name === name)) {
-//       alert(`${name} is already in contacts`);
-//       return false;
-//     }
-//     this.setState(({ contacts }) => ({ contacts: [...contacts, contact] }));
-//     return true;
-//   };
-
-//   onFilterChange = ({ value }) => {
-//     this.setState({ filter: value });
-//   };
-
-//   onFilterChangeDebounced = debounce(this.onFilterChange, 500);
-
-//   onDeleteContact = ({ id }) => {
-//     this.setState(prevState => ({
-//       contacts: prevState.contacts.filter(contact => contact.id !== id),
-//     }));
-//   };
-
-//   render() {
-//     const { contacts, filter } = this.state;
-//     let filteredContacts = contacts;
-//     if (filter) {
-//       filteredContacts = contacts.filter(({ name }) => {
-//         return name.toLowerCase().includes(filter.toLowerCase());
-//       });
-//     }
-//     return (
-//       <div style={{ marginLeft: '30px' }}>
-//         <h1>Phonebook</h1>
-//         <ContactForm onSubmit={this.onSubmit} />
-
-//         <h2>Contacts</h2>
-//         <Filter onInput={this.onFilterChangeDebounced} />
-//         <ContactList
-//           contacts={filteredContacts}
-//           onDelete={this.onDeleteContact}
-//         />
-//       </div>
-//     );
-//   }
-// }

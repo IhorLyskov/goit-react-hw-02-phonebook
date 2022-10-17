@@ -23,13 +23,4 @@ body {
     margin: 0;
     padding: 0;
   }
-  img {
-    display: block;
-    max-width: 100%;
-    height: auto;
-  }
-  ul,
-  ol {
-    list-style: none;
-  }
 `;

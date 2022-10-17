@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+
 import { customAlphabet } from 'nanoid';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
@@ -10,16 +11,17 @@ import {
   ErrorMessageStyled,
   FieldStyled,
   ButtonStyled,
+  LabelStyled,
 } from './ContactForm.styled';
 
 const schema = Yup.object().shape({
   name: Yup.string()
-    .min(3, 'Minimum 3 letters!')
     .matches(
       namePattern,
       'Name may contain only letters, apostrophe, dash and spaces!'
     )
     .required('This field is required!'),
+
   number: Yup.string()
     .matches(
       phonePattern,
@@ -30,12 +32,10 @@ const schema = Yup.object().shape({
 
 function ContactForm({ onSubmit }) {
   const handleSubmit = ({ name, number }, { resetForm }) => {
-    const id = 'id-' + customAlphabet('1234567890', 3)(3);
-
-    console.log(id, name, number);
-    // if (onSubmit({ id, name, number })) {
-    //   resetForm();
-    // }
+    const id = 'id-' + customAlphabet('1234567890', 3)();
+    if (onSubmit({ id, name, number })) {
+      resetForm();
+    }
   };
 
   return (
@@ -44,18 +44,14 @@ function ContactForm({ onSubmit }) {
       validationSchema={schema}
       onSubmit={handleSubmit}
     >
-      <FormStyled name="contact-form">
-        <label htmlFor="name">
-          Name:
-          <FieldStyled type="text" name="name" />
-          <ErrorMessageStyled name="name" component="div" />
-        </label>
+      <FormStyled>
+        <LabelStyled htmlFor="name">Name</LabelStyled>
+        <FieldStyled type="text" name="name" />
+        <ErrorMessageStyled name="name" component="div" />
 
-        <label htmlFor="number">
-          Number:
-          <FieldStyled type="tel" name="number" />
-          <ErrorMessageStyled name="number" component="div" />
-        </label>
+        <LabelStyled htmlFor="number">Number</LabelStyled>
+        <FieldStyled type="tel" name="number" />
+        <ErrorMessageStyled name="number" component="div" />
 
         <ButtonStyled type="submit">Add contact</ButtonStyled>
       </FormStyled>
@@ -63,6 +59,6 @@ function ContactForm({ onSubmit }) {
   );
 }
 
-ContactForm.tropTypes = { onSubmit: PropTypes.func };
+ContactForm.tropTypes = { handleSubmit: PropTypes.func };
 
 export default ContactForm;
